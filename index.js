@@ -44,24 +44,27 @@ app.post('/datos', async (req, res) => {
 
   const payload = {
     'datos/actual': {
-      t:  d.t,
-      h:  d.h,
-      e:  d.e  || false,
-      x:  d.x  || false,
-      st: d.st || 22,
-      ht: d.ht || 1,
-      sh: d.sh || 60,
-      hh: d.hh || 5,
-      ip: d.ip || '',
-      up: d.up || 0,
-      ts: tsKey
+      t:     d.t,
+      h:     d.h,
+      e:     d.e     || false,
+      x:     d.x     || false,
+      st:    d.st    || 22,
+      ht:    d.ht    || 1,
+      sh:    d.sh    || 60,
+      hh:    d.hh    || 5,
+      ip:    d.ip    || '',
+      up:    d.up    || 0,
+      ts:    tsKey,
+      fase:  d.fase  || 1,
+      hFase: d.hFase || 0
     },
     [`datos/historico/${tsKey}`]: {
-      t:  d.t,
-      h:  d.h,
-      e:  d.e  || false,
-      x:  d.x  || false,
-      ts: tsKey
+      t:     d.t,
+      h:     d.h,
+      e:     d.e    || false,
+      x:     d.x    || false,
+      ts:    tsKey,
+      fase:  d.fase || 1
     }
   };
 
