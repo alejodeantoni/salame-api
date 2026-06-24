@@ -30,9 +30,14 @@ function firebasePatch(path, data) {
 // POST /datos — recibe datos del Wemos por HTTP plano
 app.post('/datos', async (req, res) => {
   const d = req.body;
-  if (d.t === undefined || d.h === undefined) {
-    return res.status(400).json({ error: 'faltan datos' });
+  // Aceptar tanto números como strings
+  const t = parseFloat(d.t);
+  const h = parseFloat(d.h);
+  if (isNaN(t) || isNaN(h)) {
+    return res.status(400).json({ error: 'faltan datos', recibido: d });
   }
+  d.t = t;
+  d.h = h;
 
   const now   = Date.now();
   const tsKey = Math.floor(now / 1000);
@@ -66,6 +71,28 @@ app.post('/datos', async (req, res) => {
     res.json({ ok: true, fb: result.status });
   } catch (err) {
     console.error('Firebase error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /fase — cambia la fase activa (lo guarda en Firebase)
+app.post('/fase', async (req, res) => {
+  // Si mandan fase=0 o no mandan nada, leer la actual y pasar a la siguiente
+  let nuevaFase = parseInt(req.body.fase);
+  if (!nuevaFase || nuevaFase === 0) {
+    // Leer fase actual de Firebase
+    const r = await new Promise((resolve, reject) => {
+      const options = { hostname: FIREBASE_HOST, path: `/control/fase.json?auth=${FIREBASE_AUTH}`, method: 'GET' };
+      const req2 = https.request(options, res2 => { let d=''; res2.on('data',c=>d+=c); res2.on('end',()=>resolve(JSON.parse(d)||1)); });
+      req2.on('error', reject); req2.end();
+    });
+    nuevaFase = r === 1 ? 2 : 1;
+  }
+  if (nuevaFase !== 1 && nuevaFase !== 2) return res.status(400).json({ error: 'fase inválida' });
+  try {
+    await firebasePatch('/', { 'control/fase': nuevaFase, 'control/faseTs': Math.floor(Date.now()/1000) });
+    res.json({ ok: true, fase: nuevaFase });
+  } catch(err) {
     res.status(500).json({ error: err.message });
   }
 });
