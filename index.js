@@ -3,6 +3,15 @@ const https   = require('https');
 const app     = express();
 app.use(express.json());
 
+// CORS — permite requests desde GitHub Pages y cualquier origen
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 const FIREBASE_HOST = 'salamesystem-2ec66-default-rtdb.firebaseio.com';
 const FIREBASE_AUTH = 'Yd8XQupm9mK1PyMGBKJ876leiYbliYSDAmoIziIp';
 
