@@ -52,6 +52,7 @@ app.post('/datos', async (req, res) => {
   const tsKey = Math.floor(now / 1000);
 
   const payload = {
+    'control/tsServidor': tsKey,  // timestamp actual del servidor
     'datos/actual': {
       t:     d.t,
       h:     d.h,
